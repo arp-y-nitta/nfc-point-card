@@ -46,7 +46,7 @@ function ScanContent() {
         if (initialized) {
           try {
             inClient = isInClient();
-            // @ts-ignore - LIFFグローバル変数にアクセス
+            // @ts-expect-error LIFFグローバル変数にアクセス
             loggedIn = window.liff?.isLoggedIn() || false;
           } catch (e) {
             console.error("Error checking LIFF state:", e);
