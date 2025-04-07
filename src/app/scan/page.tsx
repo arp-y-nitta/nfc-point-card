@@ -1,10 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { initializeLiff, getUserProfile } from "../liff";
 
-export default function ScanPage() {
+function ScanContent() {
   const searchParams = useSearchParams();
   const storeId = searchParams.get("storeId");
 
@@ -144,5 +144,25 @@ export default function ScanPage() {
         </p>
       </div>
     </div>
+  );
+}
+
+// ローディング表示用のコンポーネント
+function LoadingPage() {
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-gray-100">
+      <div className="text-center p-8 bg-white rounded-lg shadow-md">
+        <h1 className="text-2xl font-bold mb-4">読み込み中...</h1>
+        <p>ページを準備しています。しばらくお待ちください。</p>
+      </div>
+    </div>
+  );
+}
+
+export default function ScanPage() {
+  return (
+    <Suspense fallback={<LoadingPage />}>
+      <ScanContent />
+    </Suspense>
   );
 }
