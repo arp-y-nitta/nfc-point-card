@@ -2,7 +2,7 @@
 
 import { useEffect, useState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
-import { initializeLiff, getUserProfile } from "../liff";
+import { initializeLiff, getUserProfile, isInClient } from "../liff";
 
 function ScanContent() {
   const searchParams = useSearchParams();
@@ -16,15 +16,50 @@ function ScanContent() {
     success: boolean;
   } | null>(null);
   const [isInLINE, setIsInLINE] = useState(false);
+  const [debugInfo, setDebugInfo] = useState<{
+    liffId: string;
+    isInClient: boolean;
+    isLoggedIn: boolean;
+    initSuccess: boolean;
+    userAgent: string;
+  } | null>(null);
 
   useEffect(() => {
     const initLiffAndGetProfile = async () => {
       try {
         setIsLoading(true);
+        const userAgent = navigator.userAgent;
+        console.log("User Agent:", userAgent);
+
+        // LIFF ID確認
+        const liffId = process.env.NEXT_PUBLIC_LIFF_ID || "";
+        console.log("LIFF ID:", liffId);
 
         // LIFF初期化
         const initialized = await initializeLiff();
         console.log("LIFF initialization result:", initialized);
+
+        // デバッグ情報の収集
+        let inClient = false;
+        let loggedIn = false;
+
+        if (initialized) {
+          try {
+            inClient = isInClient();
+            // @ts-ignore - LIFFグローバル変数にアクセス
+            loggedIn = window.liff?.isLoggedIn() || false;
+          } catch (e) {
+            console.error("Error checking LIFF state:", e);
+          }
+        }
+
+        setDebugInfo({
+          liffId,
+          isInClient: inClient,
+          isLoggedIn: loggedIn,
+          initSuccess: initialized,
+          userAgent,
+        });
 
         if (!initialized) {
           // ブラウザでの直接アクセス時
@@ -48,10 +83,24 @@ function ScanContent() {
         }
 
         // LINE内でのアクセス確認
-        setIsInLINE(true);
+        setIsInLINE(inClient);
 
         if (!storeId) {
           setError("店舗IDが指定されていません。");
+          setIsLoading(false);
+          return;
+        }
+
+        // LINE内でないか、ログインしていない場合はテストモード
+        if (!inClient) {
+          setScanResult({
+            userId: "external-browser-user",
+            storeId: storeId,
+            success: true,
+          });
+          setError(
+            "LINEアプリ外からのアクセスです。テストモードで表示します。"
+          );
           setIsLoading(false);
           return;
         }
@@ -206,6 +255,38 @@ function ScanContent() {
             ? "これはテスト表示です。実際のスキャンはLINEアプリ内で行ってください。"
             : "このページはポイント付与の証明としてお使いいただけます。必要に応じてスクリーンショットをお撮りください。"}
         </p>
+
+        {/* デバッグ情報 */}
+        <div className="mt-6 border border-slate-200 rounded-lg p-3 bg-slate-50">
+          <details>
+            <summary className="text-xs font-medium text-slate-500 cursor-pointer">
+              デバッグ情報
+            </summary>
+            {debugInfo && (
+              <div className="mt-2 text-left text-xs font-mono text-slate-600">
+                <div className="grid grid-cols-2 gap-1">
+                  <span>LIFF ID:</span>
+                  <span>{debugInfo.liffId || "未設定"}</span>
+
+                  <span>初期化成功:</span>
+                  <span>{debugInfo.initSuccess ? "はい" : "いいえ"}</span>
+
+                  <span>LINE内:</span>
+                  <span>{debugInfo.isInClient ? "はい" : "いいえ"}</span>
+
+                  <span>ログイン済:</span>
+                  <span>{debugInfo.isLoggedIn ? "はい" : "いいえ"}</span>
+                </div>
+                <div className="mt-2">
+                  <span className="block">User Agent:</span>
+                  <div className="text-[10px] break-all mt-1 bg-white p-1 rounded border border-slate-200">
+                    {debugInfo.userAgent}
+                  </div>
+                </div>
+              </div>
+            )}
+          </details>
+        </div>
       </div>
     </div>
   );

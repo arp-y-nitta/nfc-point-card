@@ -1,9 +1,20 @@
 import liff from "@line/liff";
 
+// LIFFのIDを環境変数から取得
 const liffId = process.env.NEXT_PUBLIC_LIFF_ID || "";
+console.log("LIFF ID from env:", liffId);
+
+// シングルトンパターンで初期化状態を保持
+let isInitialized = false;
 
 export const initializeLiff = async () => {
   try {
+    // すでに初期化済みなら再初期化しない
+    if (isInitialized) {
+      console.log("LIFF already initialized");
+      return true;
+    }
+
     // ブラウザ環境チェック
     if (typeof window === "undefined") {
       console.error("LIFF cannot be initialized in a non-browser environment");
@@ -19,8 +30,22 @@ export const initializeLiff = async () => {
       return false;
     }
 
-    await liff.init({ liffId });
-    console.log("LIFF initialized successfully");
+    await liff.init({
+      liffId: liffId,
+      withLoginOnExternalBrowser: true, // 外部ブラウザでのログインを許可
+    });
+
+    isInitialized = true;
+    console.log("LIFF initialization successful");
+
+    // LINE内での実行かどうかをログ出力
+    const isInClient = liff.isInClient();
+    console.log("Is in LINE app:", isInClient);
+
+    // ログイン状態をログ出力
+    const isLoggedIn = liff.isLoggedIn();
+    console.log("Is logged in:", isLoggedIn);
+
     return true;
   } catch (error) {
     console.error("LIFF initialization failed", error);
@@ -36,12 +61,24 @@ export const getUserProfile = async () => {
       return null;
     }
 
+    // 初期化されていなければ初期化
+    if (!isInitialized) {
+      const initialized = await initializeLiff();
+      if (!initialized) {
+        console.error("Failed to initialize LIFF");
+        return null;
+      }
+    }
+
+    // ログインチェック
     if (!liff.isLoggedIn()) {
       console.log("User is not logged in, redirecting to login");
+      // 外部ブラウザでは、LINEログイン画面にリダイレクト
       liff.login();
       return null;
     }
 
+    // ユーザープロフィール取得
     const profile = await liff.getProfile();
     console.log("User profile retrieved:", profile.displayName);
     return {
@@ -57,7 +94,9 @@ export const getUserProfile = async () => {
 
 export const isLoggedIn = () => {
   try {
-    return typeof window !== "undefined" && liff.isLoggedIn();
+    if (typeof window === "undefined") return false;
+    if (!isInitialized) return false;
+    return liff.isLoggedIn();
   } catch (error) {
     console.error("Failed to check login status", error);
     return false;
@@ -66,9 +105,14 @@ export const isLoggedIn = () => {
 
 export const login = () => {
   try {
-    if (typeof window !== "undefined") {
-      liff.login();
+    if (typeof window === "undefined") return;
+    if (!isInitialized) {
+      initializeLiff().then(() => {
+        liff.login();
+      });
+      return;
     }
+    liff.login();
   } catch (error) {
     console.error("Failed to login", error);
   }
@@ -76,9 +120,9 @@ export const login = () => {
 
 export const logout = () => {
   try {
-    if (typeof window !== "undefined") {
-      liff.logout();
-    }
+    if (typeof window === "undefined") return;
+    if (!isInitialized) return;
+    liff.logout();
   } catch (error) {
     console.error("Failed to logout", error);
   }
@@ -86,7 +130,9 @@ export const logout = () => {
 
 export const isInClient = () => {
   try {
-    return typeof window !== "undefined" && liff.isInClient();
+    if (typeof window === "undefined") return false;
+    if (!isInitialized) return false;
+    return liff.isInClient();
   } catch (error) {
     console.error("Failed to check if in LINE client", error);
     return false;
