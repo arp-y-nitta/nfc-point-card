@@ -56,35 +56,6 @@ export default function HomePage() {
           } else {
             throw new Error("ユーザーデータの取得に失敗しました。");
           }
-        } else {
-          // テストモード
-          setUserData({
-            userId: "test-user-id",
-            displayName: "テストユーザー",
-            pictureUrl: "",
-            totalPoints: 50,
-            scanHistory: [
-              {
-                userId: "test-user-id",
-                storeId: "shibuya01",
-                timestamp: new Date(),
-                points: 10,
-              },
-              {
-                userId: "test-user-id",
-                storeId: "shinjuku02",
-                timestamp: new Date(Date.now() - 86400000),
-                points: 15,
-              },
-              {
-                userId: "test-user-id",
-                storeId: "ikebukuro03",
-                timestamp: new Date(Date.now() - 172800000),
-                points: 20,
-              },
-            ],
-          });
-          setError("注意: LINEアプリ外での表示です。テスト表示モードです。");
         }
       } catch (err) {
         console.error("Error:", err);
@@ -171,9 +142,6 @@ export default function HomePage() {
                 <h2 className="text-xl font-bold text-slate-800">
                   {userData.displayName}
                 </h2>
-                <p className="text-slate-600 text-sm">
-                  ユーザーID: {userData.userId.slice(0, 8)}...
-                </p>
               </div>
             </div>
 
@@ -184,16 +152,6 @@ export default function HomePage() {
                 {userData.totalPoints} pt
               </p>
             </div>
-          </div>
-
-          {/* スキャンボタン */}
-          <div className="m-4 flex justify-center">
-            <button
-              onClick={handleScanButtonClick}
-              className="bg-green-600 text-white py-4 px-8 rounded-full text-lg font-bold shadow-lg hover:bg-green-700"
-            >
-              スキャンする
-            </button>
           </div>
 
           {/* 履歴セクション */}
@@ -234,24 +192,7 @@ export default function HomePage() {
               </ul>
             )}
           </div>
-
-          {/* デバッグ情報 - 開発環境でのみ表示 */}
-          {process.env.NODE_ENV === "development" && (
-            <div className="border border-slate-200 rounded-lg p-3 bg-slate-50 m-4">
-              <h3 className="font-medium text-slate-700 mb-2">デバッグ情報</h3>
-              <pre className="text-xs text-slate-600 overflow-auto">
-                {JSON.stringify(
-                  {
-                    userId: userData.userId,
-                    isInLINE,
-                    isLiffInitialized,
-                  },
-                  null,
-                  2
-                )}
-              </pre>
-            </div>
-          )}
+          
         </>
       )}
     </div>

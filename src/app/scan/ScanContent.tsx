@@ -281,9 +281,6 @@ export default function ScanContent() {
                 <h3 className="text-lg font-bold text-slate-800">
                   {scanResult.user.displayName}
                 </h3>
-                <p className="text-slate-600 text-sm">
-                  ユーザーID: {scanResult.user.userId.slice(0, 8)}...
-                </p>
               </div>
             </div>
 
