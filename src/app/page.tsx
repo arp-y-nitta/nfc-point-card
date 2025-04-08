@@ -4,12 +4,15 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { initializeLiff, isInClient } from "./liff";
+import LoadingPage from "./components/LoadingPage";
 
 export default function Home() {
   const router = useRouter();
   const [isLiffInitialized, setIsLiffInitialized] = useState(false);
   const [isInLINE, setIsInLINE] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true); // 初期ロード中もtrue
+  const [isNavigating, setIsNavigating] = useState(false); // ナビゲーション中のフラグ
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     async function initLiff() {
@@ -21,6 +24,9 @@ export default function Home() {
         }
       } catch (error) {
         console.error("LIFFの初期化に失敗しました", error);
+        setError("LIFFの初期化に失敗しました。再度お試しください。");
+      } finally {
+        setIsLoading(false);
       }
     }
 
@@ -28,7 +34,7 @@ export default function Home() {
   }, []);
 
   const navigateToHome = () => {
-    setIsLoading(true);
+    setIsNavigating(true);
 
     if (isInLINE && isLiffInitialized) {
       try {
@@ -51,10 +57,15 @@ export default function Home() {
       router.push("/home");
     }
 
+    // タイムアウトでロード状態をリセット
     setTimeout(() => {
-      setIsLoading(false);
-    }, 1000);
+      setIsNavigating(false);
+    }, 3000); // 長めに設定して、遷移が完了しなかった場合にボタンが再度クリック可能になるようにする
   };
+
+  if (isLoading) {
+    return <LoadingPage />;
+  }
 
   return (
     <main className="flex min-h-screen flex-col items-center justify-center p-10 gap-10 bg-slate-50">
@@ -92,13 +103,19 @@ export default function Home() {
           IDを記録し、ポイントを貯めることができます。
         </p>
 
+        {error && (
+          <div className="mt-2 p-3 bg-amber-50 rounded-lg border border-amber-200 text-amber-700 text-sm max-w-md">
+            {error}
+          </div>
+        )}
+
         <div className="mt-4 flex flex-col gap-4">
           <button
             onClick={navigateToHome}
-            disabled={isLoading}
+            disabled={isNavigating}
             className="bg-blue-600 px-8 py-4 text-lg font-bold text-white rounded-lg transition-colors hover:bg-blue-700 shadow-md disabled:opacity-70 disabled:cursor-not-allowed"
           >
-            {isLoading ? "読み込み中..." : "ポイントカードを開く"}
+            {isNavigating ? "読み込み中..." : "ポイントカードを開く"}
           </button>
 
           {isInLINE && (

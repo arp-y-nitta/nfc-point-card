@@ -1,17 +1,20 @@
 "use client";
-
+//スキャンする画面(いらないと思う)
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { initializeLiff, isInClient } from "../liff";
+import LoadingPage from "../components/LoadingPage";
 
 export default function ScanIntroPage() {
   const router = useRouter();
+  const [isLoading, setIsLoading] = useState(true);
   const [isLiffInitialized, setIsLiffInitialized] = useState(false);
   const [isInLINE, setIsInLINE] = useState(false);
 
   useEffect(() => {
     async function initLiff() {
       try {
+        setIsLoading(true);
         const initialized = await initializeLiff();
         setIsLiffInitialized(initialized);
         if (initialized) {
@@ -19,6 +22,8 @@ export default function ScanIntroPage() {
         }
       } catch (error) {
         console.error("LIFFの初期化に失敗しました", error);
+      } finally {
+        setIsLoading(false);
       }
     }
 
@@ -68,6 +73,10 @@ export default function ScanIntroPage() {
     }
   };
 
+  if (isLoading) {
+    return <LoadingPage />;
+  }
+
   return (
     <div className="min-h-screen bg-slate-50">
       {/* ヘッダー */}
@@ -92,8 +101,9 @@ export default function ScanIntroPage() {
             </h3>
             <ul className="text-blue-700 text-sm list-disc pl-5 space-y-1">
               <li>渋谷店: 10ポイント</li>
-              <li>新宿店: 15ポイント</li>
-              <li>池袋店: 20ポイント</li>
+              <li>新宿店: 10ポイント</li>
+              <li>池袋店: 10ポイント</li>
+              <li>永福町店: 10ポイント</li>
               <li>同じ店舗は24時間に1回までポイント付与されます</li>
             </ul>
           </div>
@@ -119,6 +129,12 @@ export default function ScanIntroPage() {
               className="bg-violet-600 text-white py-3 px-4 rounded-lg hover:bg-violet-700"
             >
               池袋店をスキャン
+            </button>
+            <button
+              onClick={() => handleScanClick("eifukucho01")}
+              className="bg-violet-600 text-white py-3 px-4 rounded-lg hover:bg-violet-700"
+            >
+              永福町店をスキャン
             </button>
           </div>
         </div>

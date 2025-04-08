@@ -1,4 +1,5 @@
 import liff from "@line/liff";
+import { LiffProfile } from "./utils/types";
 
 // LIFFのIDを環境変数から取得
 const liffId = process.env.NEXT_PUBLIC_LIFF_ID || "";
@@ -53,7 +54,7 @@ export const initializeLiff = async () => {
   }
 };
 
-export const getUserProfile = async () => {
+export const getUserProfile = async (): Promise<LiffProfile | null> => {
   try {
     // ブラウザ環境チェック
     if (typeof window === "undefined") {
@@ -81,11 +82,16 @@ export const getUserProfile = async () => {
     // ユーザープロフィール取得
     const profile = await liff.getProfile();
     console.log("User profile retrieved:", profile.displayName);
-    return {
+
+    // 明示的な型変換でLiffProfileに適合
+    const liffProfile: LiffProfile = {
       userId: profile.userId,
       displayName: profile.displayName,
       pictureUrl: profile.pictureUrl,
+      statusMessage: profile.statusMessage,
     };
+
+    return liffProfile;
   } catch (error) {
     console.error("Failed to get user profile", error);
     return null;

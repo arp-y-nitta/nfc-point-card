@@ -1,41 +1,17 @@
 import { NextRequest, NextResponse } from "next/server";
 import { storeNames, storePointsMap } from "../../utils/stores";
+import { User, ScanRecord } from "../../utils/types";
 
-// データ型の定義
-interface ScanRecord {
-  userId: string;
-  storeId: string;
-  timestamp: Date;
-  points: number;
-}
-
-interface User {
-  userId: string;
-  displayName: string;
-  pictureUrl?: string;
-  totalPoints: number;
-  scanHistory: ScanRecord[];
-}
+// データ型の定義をインポートに変更
+// interface ScanRecord {...}
+// interface User {...}
 
 // インメモリデータベース（実際の開発では永続化ストレージを使用すべき）
 const usersDB: Record<string, User> = {};
 
-// 店舗ごとのポイント付与数の設定
-// const storePointsMap: Record<string, number> = {
-//   shibuya01: 10,
-//   shinjuku02: 15,
-//   ikebukuro03: 20,
-//   // デフォルト値
-//   default: 5,
-// };
-
-// 店舗名のマッピング
-// const storeNames: Record<string, string> = {
-//   shibuya01: "渋谷店",
-//   shinjuku02: "新宿店",
-//   ikebukuro03: "池袋店",
-//   default: "不明な店舗",
-// };
+// コメントアウトされたコードを削除
+// const storePointsMap: Record<string, number> = { ... }
+// const storeNames: Record<string, string> = { ... }
 
 export async function POST(request: NextRequest): Promise<NextResponse> {
   try {
@@ -45,6 +21,14 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     if (!userId || !storeId) {
       return NextResponse.json(
         { error: "userId and storeId are required" },
+        { status: 400 }
+      );
+    }
+
+    // 店舗IDの検証
+    if (!storePointsMap[storeId] && storeId !== "test") {
+      return NextResponse.json(
+        { error: `Invalid storeId: ${storeId}` },
         { status: 400 }
       );
     }
@@ -120,10 +104,9 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     );
   } catch (error) {
     console.error("Error processing scan:", error);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
-    );
+    const errorMessage =
+      error instanceof Error ? error.message : "Internal server error";
+    return NextResponse.json({ error: errorMessage }, { status: 500 });
   }
 }
 
@@ -158,9 +141,8 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     });
   } catch (error) {
     console.error("Error fetching user data:", error);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
-    );
+    const errorMessage =
+      error instanceof Error ? error.message : "Internal server error";
+    return NextResponse.json({ error: errorMessage }, { status: 500 });
   }
 }
