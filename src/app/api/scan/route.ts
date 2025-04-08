@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
 // データ型の定義
 interface ScanRecord {
@@ -36,7 +36,7 @@ export const storeNames: Record<string, string> = {
   default: "不明な店舗",
 };
 
-export async function POST(request: Request) {
+export async function POST(request: NextRequest): Promise<NextResponse> {
   try {
     const body = await request.json();
     const { userId, storeId, displayName, pictureUrl } = body;
@@ -127,7 +127,7 @@ export async function POST(request: Request) {
 }
 
 // ユーザーの履歴取得API
-export async function GET(request: Request) {
+export async function GET(request: NextRequest): Promise<NextResponse> {
   try {
     const { searchParams } = new URL(request.url);
     const userId = searchParams.get("userId");
