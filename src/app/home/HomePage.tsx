@@ -208,7 +208,7 @@ export default function HomePage() {
               </p>
             ) : (
               <ul className="divide-y divide-slate-100">
-                {userData.scanHistory.map((scan, index) => (
+                {userData.scanHistory.map((scan: ScanRecord, index: number) => (
                   <li key={index} className="py-3">
                     <div className="flex justify-between items-center">
                       <div>
