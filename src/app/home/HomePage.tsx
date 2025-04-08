@@ -2,7 +2,7 @@
 //ホーム画面
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { initializeLiff, getUserProfile, isInClient } from "../liff";
+import { initializeLiff, getUserProfile } from "../liff";
 import { storeNames } from "../utils/stores";
 import Image from "next/image";
 import LoadingPage from "../components/LoadingPage";
@@ -13,8 +13,6 @@ export default function HomePage() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [userData, setUserData] = useState<User | null>(null);
-  const [isLiffInitialized, setIsLiffInitialized] = useState(false);
-  const [isInLINE, setIsInLINE] = useState(false);
 
   useEffect(() => {
     const initLiffAndGetProfile = async () => {
@@ -23,11 +21,8 @@ export default function HomePage() {
 
         // LIFF初期化
         const initialized = await initializeLiff();
-        setIsLiffInitialized(initialized);
 
         if (initialized) {
-          setIsInLINE(isInClient());
-
           // ユーザープロフィール取得
           const profile = await getUserProfile();
           if (!profile) {
@@ -67,27 +62,6 @@ export default function HomePage() {
 
     initLiffAndGetProfile();
   }, [router]);
-
-  const handleScanButtonClick = () => {
-    if (isInLINE && isLiffInitialized) {
-      try {
-        // @ts-expect-error liffグローバル変数へのアクセス
-        if (window.liff) {
-          // LIFF URLを開く（NFCタグと同じURLにアクセス）
-          // @ts-expect-error liffグローバル変数へのアクセス
-          window.liff.openWindow({
-            url: `${window.location.origin}/scan-intro`,
-            external: false,
-          });
-        }
-      } catch (error) {
-        console.error("LIFF遷移エラー:", error);
-        router.push("/scan-intro");
-      }
-    } else {
-      router.push("/scan-intro");
-    }
-  };
 
   const getErrorMessage = (error: unknown): string => {
     if (error instanceof Error) {
@@ -192,7 +166,6 @@ export default function HomePage() {
               </ul>
             )}
           </div>
-          
         </>
       )}
     </div>
