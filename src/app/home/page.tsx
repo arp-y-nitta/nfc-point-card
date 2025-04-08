@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { initializeLiff, getUserProfile, isInClient } from "../liff";
-import { storeNames } from "../api/scan/route";
+import { storeNames } from "../utils/stores";
 import Image from "next/image";
 
 interface ScanRecord {

@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { storeNames, storePointsMap } from "../../utils/stores";
 
 // データ型の定義
 interface ScanRecord {
@@ -20,21 +21,21 @@ interface User {
 const usersDB: Record<string, User> = {};
 
 // 店舗ごとのポイント付与数の設定
-const storePointsMap: Record<string, number> = {
-  shibuya01: 10,
-  shinjuku02: 15,
-  ikebukuro03: 20,
-  // デフォルト値
-  default: 5,
-};
+// const storePointsMap: Record<string, number> = {
+//   shibuya01: 10,
+//   shinjuku02: 15,
+//   ikebukuro03: 20,
+//   // デフォルト値
+//   default: 5,
+// };
 
 // 店舗名のマッピング
-export const storeNames: Record<string, string> = {
-  shibuya01: "渋谷店",
-  shinjuku02: "新宿店",
-  ikebukuro03: "池袋店",
-  default: "不明な店舗",
-};
+// const storeNames: Record<string, string> = {
+//   shibuya01: "渋谷店",
+//   shinjuku02: "新宿店",
+//   ikebukuro03: "池袋店",
+//   default: "不明な店舗",
+// };
 
 export async function POST(request: NextRequest): Promise<NextResponse> {
   try {
