@@ -154,12 +154,21 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       .eq("user_id", userId)
       .order("timestamp", { ascending: false });
 
+    // キー名を変換
+    const formattedScanHistory =
+      scanHistory?.map((record) => ({
+        ...record,
+        storeId: record.store_id,
+        timestamp: record.timestamp,
+        points: record.points,
+      })) || [];
+
     return NextResponse.json({
       userId: user.user_id,
       displayName: user.display_name,
       pictureUrl: user.picture_url,
       totalPoints: user.total_points,
-      scanHistory: scanHistory,
+      scanHistory: formattedScanHistory,
     });
   } catch (error) {
     console.error("Error fetching user data:", error);
