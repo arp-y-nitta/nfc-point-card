@@ -192,23 +192,8 @@ export default function ScanContent() {
   }, [storeId, router]);
 
   const handleGoToHome = () => {
-    if (isInLINE && isLiffInitialized) {
-      try {
-        // @ts-expect-error liffグローバル変数へのアクセス
-        if (window.liff) {
-          // @ts-expect-error liffグローバル変数へのアクセス
-          window.liff.openWindow({
-            url: `${window.location.origin}/home`,
-            external: false,
-          });
-        }
-      } catch (error) {
-        console.error("LIFF遷移エラー:", error);
-        router.push("/home");
-      }
-    } else {
-      router.push("/home");
-    }
+    // 常にNext.jsのrouterを使用してホームページに遷移
+    router.push("/home");
   };
 
   if (isLoading) {
