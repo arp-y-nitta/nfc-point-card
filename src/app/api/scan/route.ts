@@ -93,6 +93,15 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       .order("timestamp", { ascending: false })
       .limit(10);
 
+    // キー名を変換
+    const formattedScanHistory =
+      scanHistory?.map((record) => ({
+        ...record,
+        storeId: record.store_id,
+        timestamp: record.timestamp,
+        points: record.points,
+      })) || [];
+
     return NextResponse.json(
       {
         success: true,
@@ -103,7 +112,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
           displayName: user.display_name,
           pictureUrl: user.picture_url,
           totalPoints: user.total_points,
-          scanHistory: scanHistory,
+          scanHistory: formattedScanHistory,
         },
         storeName: storeNames[storeId] || storeNames.default,
       },
