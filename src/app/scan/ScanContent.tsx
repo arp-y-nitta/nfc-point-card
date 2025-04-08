@@ -35,8 +35,6 @@ export default function ScanContent() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [scanResult, setScanResult] = useState<ScanResult | null>(null);
-  const [isInLINE, setIsInLINE] = useState(false);
-  const [isLiffInitialized, setIsLiffInitialized] = useState(false);
   const [debugInfo, setDebugInfo] = useState<{
     liffId: string;
     isInClient: boolean;
@@ -58,7 +56,6 @@ export default function ScanContent() {
 
         // LIFF初期化
         const initialized = await initializeLiff();
-        setIsLiffInitialized(initialized);
         console.log("LIFF initialization result:", initialized);
 
         // デバッグ情報の収集
@@ -114,9 +111,6 @@ export default function ScanContent() {
             return;
           }
         }
-
-        // LINE内でのアクセス確認
-        setIsInLINE(inClient);
 
         if (!storeId) {
           setError("店舗IDが指定されていません。");
