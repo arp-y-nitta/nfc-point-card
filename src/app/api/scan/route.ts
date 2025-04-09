@@ -49,8 +49,10 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     }
 
     // 24時間以内の同じ店舗のスキャンをチェック
+    //デバッグ用に1分で設定
     const twentyFourHoursAgo = new Date(
-      Date.now() - 24 * 60 * 60 * 1000
+      Date.now() - 1 * 60 * 1000 // 1分
+      //Date.now() - 24 * 60 * 60 * 1000 //24時間
     ).toISOString();
     const { data: recentScan } = await supabase
       .from("scan_records")
